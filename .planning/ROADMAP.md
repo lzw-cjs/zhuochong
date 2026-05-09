@@ -112,12 +112,12 @@
 
 **Requirements**: REM-01, REM-02, REM-03
 
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
-- [ ] 05-01-PLAN.md — Reminder engine core (TDD): rename overdue detector, build ReminderEngine with 60s polling, dedup, suppression, pytest infrastructure
-- [ ] 05-02-PLAN.md — ALERT state & visual feedback: add PetState.ALERT to enum + transitions, generate placeholder frames in animator
-- [ ] 05-03-PLAN.md — Integration & sound wiring: create SoundManager with QSoundEffect, generate reminder.wav, wire reminder_fired to bubble + ALERT + sound in main.py
-- [ ] 05-04-PLAN.md — Lifecycle & tray polish: add reminder toggle to tray menu, wire suppression signal, cleanup on exit
+- [x] 05-01-PLAN.md — Reminder engine core (TDD): rename overdue detector, build ReminderEngine with 60s polling, dedup, suppression, pytest infrastructure
+- [x] 05-02-PLAN.md — ALERT state & visual feedback: add PetState.ALERT to enum + transitions, generate placeholder frames in animator
+- [x] 05-03-PLAN.md — Integration & sound wiring: create SoundManager with QSoundEffect, generate reminder.wav, wire reminder_fired to bubble + ALERT + sound in main.py
+- [x] 05-04-PLAN.md — Lifecycle & tray polish: add reminder toggle to tray menu, wire suppression signal, cleanup on exit
 
 ---
 
