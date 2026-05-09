@@ -244,6 +244,12 @@ def main():
 
     tray.toggle_visibility.connect(toggle_pet_visibility)
 
+    # 托盘提醒开关
+    def on_reminder_suppress(suppressed):
+        pre_reminder.suppress(suppressed)
+
+    tray.reminder_suppress.connect(on_reminder_suppress)
+
     window.show()
     tray.show()
 
