@@ -7,12 +7,15 @@ from data.event import Event
 from data.schedule_store import ScheduleStore
 
 
+_SENTINEL = object()
+
+
 @pytest.fixture
 def make_event():
     """Factory for creating Event objects with sensible defaults."""
     def _make(
         title: str = "Test Event",
-        datetime_str: str = "",
+        datetime_str: str = _SENTINEL,
         reminder_minutes: int = 15,
         status: str = "pending",
         id: str = "test-evt-001",
@@ -20,7 +23,7 @@ def make_event():
         completed: bool = False,
         **kwargs,
     ) -> Event:
-        if not datetime_str:
+        if datetime_str is _SENTINEL:
             datetime_str = (datetime.now() + timedelta(minutes=10)).isoformat()
         return Event(
             title=title,
