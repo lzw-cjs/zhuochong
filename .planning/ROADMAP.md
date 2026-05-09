@@ -112,11 +112,12 @@
 
 **Requirements**: REM-01, REM-02, REM-03
 
-**Plans:**
-1. **P5.1 — Reminder engine core** — Build ReminderEngine with 60s polling loop, compare event times against wall clock using absolute UTC timestamps, deduplication via last_fired set, connect to ScheduleStore.
-2. **P5.2 — Bubble popup & alert state** — Show ChatBubble near pet with event title when reminder fires, trigger ALERT animation state on the pet, auto-dismiss after timeout or click.
-3. **P5.3 — Configurable timing & sound** — Add reminder_minutes field to Event model, support per-event timing (5/15/60/custom), implement QSoundEffect playback for WAV notification sound, respect mute setting.
-4. **P5.4 — Reminder lifecycle** — Handle sleep/wake drift (compare absolute timestamps), clear fired reminders, wire "Show/Hide" from tray to suppress/restore reminders, graceful shutdown cleanup.
+**Plans:** 4 plans
+
+- [ ] 05-01-PLAN.md — Reminder engine core (TDD): rename overdue detector, build ReminderEngine with 60s polling, dedup, suppression, pytest infrastructure
+- [ ] 05-02-PLAN.md — ALERT state & visual feedback: add PetState.ALERT to enum + transitions, generate placeholder frames in animator
+- [ ] 05-03-PLAN.md — Integration & sound wiring: create SoundManager with QSoundEffect, generate reminder.wav, wire reminder_fired to bubble + ALERT + sound in main.py
+- [ ] 05-04-PLAN.md — Lifecycle & tray polish: add reminder toggle to tray menu, wire suppression signal, cleanup on exit
 
 ---
 
@@ -141,4 +142,4 @@
 
 ---
 
-*Last updated: 2026-05-09 — Roadmap created with 6 phases, 22 requirements mapped*
+*Last updated: 2026-05-10 — Phase 5 planned with 4 plans (REM-01, REM-02, REM-03)*
