@@ -24,6 +24,10 @@ class ReminderEngine(QObject):
     def suppress(self, suppress: bool) -> None:
         self._suppressed = suppress
 
+    def stop(self) -> None:
+        """Stop the polling timer."""
+        self._timer.stop()
+
     def clear_fired(self, event_id: str | None = None) -> None:
         if event_id:
             self._fired.discard(event_id)

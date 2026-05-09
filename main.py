@@ -21,6 +21,9 @@ from pet.schedule_panel import SchedulePanel
 from pet.overdue_detector import ReminderEngine
 from pet.overdue_widget import OverdueWidget
 from data.schedule_store import ScheduleStore
+from pathlib import Path
+from pet.reminder_engine import ReminderEngine as PreReminderEngine
+from pet.sound_manager import SoundManager
 
 
 def main():
@@ -99,6 +102,26 @@ def main():
     # 创建提醒引擎
     schedule_store = ScheduleStore()
     reminder = ReminderEngine(schedule_store)
+
+    # 创建前提醒引擎
+    pre_reminder = PreReminderEngine(schedule_store)
+
+    # 创建音效管理器
+    sound_manager = SoundManager(Path("assets/sounds"))
+
+    # 提醒触发处理：气泡 + 警报动画 + 音效
+    def on_reminder_fired(ev):
+        # 显示气泡
+        pos = window.get_position()
+        bubble.show_message(f"提醒: {ev.title}", pos[0] + 32, pos[1], duration_ms=5000)
+        # 触发 ALERT 动画
+        animator.set_state(PetState.ALERT)
+        # 播放音效
+        sound_manager.play_reminder(muted=settings.muted)
+        # 5 秒后恢复 IDLE
+        QTimer.singleShot(5000, lambda: animator.set_state(PetState.IDLE))
+
+    pre_reminder.reminder_fired.connect(on_reminder_fired)
 
     # 提前完成 → 夸赞 + 开心状态
     praise_messages = [
@@ -190,6 +213,7 @@ def main():
 
     # 退出时保存最终状态
     def on_about_to_quit():
+        pre_reminder.stop()  # 停止前提醒轮询
         pos = window.get_position()
         s = Settings(
             pet_x=pos[0],
@@ -212,9 +236,11 @@ def main():
         if window.isVisible():
             window.hide()
             tray.update_visibility_state(False)
+            pre_reminder.suppress(True)
         else:
             window.show()
             tray.update_visibility_state(True)
+            pre_reminder.suppress(False)
 
     tray.toggle_visibility.connect(toggle_pet_visibility)
 
