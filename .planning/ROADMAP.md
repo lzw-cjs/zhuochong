@@ -112,7 +112,7 @@
 
 **Requirements**: REM-01, REM-02, REM-03
 
-**Plans:** 4/4 plans complete
+**Plans:** 5/5 plans complete
 
 - [x] 05-01-PLAN.md — Reminder engine core (TDD): rename overdue detector, build ReminderEngine with 60s polling, dedup, suppression, pytest infrastructure
 - [x] 05-02-PLAN.md — ALERT state & visual feedback: add PetState.ALERT to enum + transitions, generate placeholder frames in animator
