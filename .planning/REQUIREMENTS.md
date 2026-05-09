@@ -5,7 +5,9 @@
 ### Pet Core (宠物核心)
 - [ ] **PET-01**: 透明无边框窗口，始终置顶，在桌面上渲染宠物（FramelessWindowHint + WindowStaysOnTopHint + WA_TranslucentBackground）
 - [ ] **PET-02**: 鼠标拖拽移动宠物位置（mousePressEvent/mouseMoveEvent/mouseReleaseEvent）
-- [ ] **PET-03**: 多状态 Sprite 帧动画（idle、walk、sit、sleep、happy、alert），使用 QPixmap + QTimer 实现
+- [ ] **PET-03**: 多状态 Sprite 帧动画，使用 QPixmap + QTimer 实现
+  - Phase 1（本版本）：idle、walk、sleep、happy（4 个状态，见 CONTEXT.md D-04）
+  - Phase 2+：sit、alert（2 个额外状态，待交互功能就绪后添加）
 - [ ] **PET-04**: 点击宠物触发动画反馈和对话气泡
 
 ### Interaction (交互)
