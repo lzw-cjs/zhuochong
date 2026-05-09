@@ -69,12 +69,28 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PET-01 ~ PET-04 | TBD | Pending |
-| INT-01 ~ INT-05 | TBD | Pending |
-| SCH-01 ~ SCH-04 | TBD | Pending |
-| REM-01 ~ REM-03 | TBD | Pending |
-| DAT-01 ~ DAT-03 | TBD | Pending |
-| PKG-01 ~ PKG-03 | TBD | Pending |
+| PET-01 | Phase 1 — Skeleton & Animation | Pending |
+| PET-02 | Phase 2 — Interaction | Pending |
+| PET-03 | Phase 1 — Skeleton & Animation | Pending |
+| PET-04 | Phase 2 — Interaction | Pending |
+| INT-01 | Phase 2 — Interaction | Pending |
+| INT-02 | Phase 2 — Interaction | Pending |
+| INT-03 | Phase 3 — Chat System | Pending |
+| INT-04 | Phase 3 — Chat System | Pending |
+| INT-05 | Phase 3 — Chat System | Pending |
+| SCH-01 | Phase 4 — Calendar Data Layer | Pending |
+| SCH-02 | Phase 4 — Calendar Data Layer | Pending |
+| SCH-03 | Phase 4 — Calendar Data Layer | Pending |
+| SCH-04 | Phase 4 — Calendar Data Layer | Pending |
+| REM-01 | Phase 5 — Reminder Engine | Pending |
+| REM-02 | Phase 5 — Reminder Engine | Pending |
+| REM-03 | Phase 5 — Reminder Engine | Pending |
+| DAT-01 | Phase 1 — Skeleton & Animation | Pending |
+| DAT-02 | Phase 1 — Skeleton & Animation | Pending |
+| DAT-03 | Phase 6 — Polish & Packaging | Pending |
+| PKG-01 | Phase 6 — Polish & Packaging | Pending |
+| PKG-02 | Phase 6 — Polish & Packaging | Pending |
+| PKG-03 | Phase 6 — Polish & Packaging | Pending |
 
 ---
 *Last updated: 2026-05-09 — Initial requirements definition*
