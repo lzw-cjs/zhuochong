@@ -5,6 +5,10 @@ import sys
 # Win11 RHI 渲染修复：强制使用 OpenGL 后端
 os.environ["QSG_RHI_BACKEND"] = "opengl"
 
+# PyInstaller frozen mode: ensure Qt can find its platform plugins
+if getattr(sys, 'frozen', False):
+    os.environ['QT_PLUGIN_PATH'] = os.path.join(sys._MEIPASS, 'PySide6', 'Qt', 'plugins')
+
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QTimer
 
