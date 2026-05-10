@@ -21,9 +21,9 @@ from pet.schedule_panel import SchedulePanel
 from pet.overdue_detector import ReminderEngine
 from pet.overdue_widget import OverdueWidget
 from data.schedule_store import ScheduleStore
-from pathlib import Path
 from pet.reminder_engine import ReminderEngine as PreReminderEngine
 from pet.sound_manager import SoundManager
+from utils.assets import get_asset_path
 
 
 def main():
@@ -107,7 +107,7 @@ def main():
     pre_reminder = PreReminderEngine(schedule_store)
 
     # 创建音效管理器
-    sound_manager = SoundManager(Path("assets/sounds"))
+    sound_manager = SoundManager(get_asset_path("assets/sounds"))
 
     # 提醒触发处理：气泡 + 警报动画 + 音效
     def on_reminder_fired(ev):
