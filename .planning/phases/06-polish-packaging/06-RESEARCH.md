@@ -547,22 +547,16 @@ if getattr(sys, 'frozen', False):
 | A4 | The project does not use QML, only QWidget-based UI | Pattern 4 excludes | If QML is used, `QtQml` and `QtQuick` should NOT be excluded |
 | A5 | `os.replace()` is atomic on Windows for the migration save-back | Pattern 2 | Verified in CLAUDE.md as correct |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Should chat_rules.json be bundled as an asset or remain in data/?**
-   - What we know: Currently at `data/chat_rules.json`, loaded via `Path(__file__).parent.parent / "data"`
-   - What's unclear: Whether it should be a bundled asset (read-only) or remain editable
-   - Recommendation: Bundle it as an asset (read-only). If user customization is needed later, copy to APPDATA on first run.
+1. **Should chat_rules.json be bundled as an asset or remain in data/?** — RESOLVED
+   - Resolution: Bundle as data/ asset via PyInstaller spec `project_datas` (Plan 06-04). Use `get_asset_path("data/chat_rules.json")` for loading (Plan 06-01).
 
-2. **PyInstaller version to install?**
-   - What we know: PyInstaller 6.x is current; not installed in environment
-   - What's unclear: Exact version to pin
-   - Recommendation: Install latest PyInstaller 6.x (`pip install PyInstaller`)
+2. **PyInstaller version to install?** — RESOLVED
+   - Resolution: Install latest PyInstaller 6.x via `pip install PyInstaller` (Plan 06-04, Task 1).
 
-3. **Should the .ico be generated at build time or committed as a binary asset?**
-   - What we know: No .ico exists yet; Pillow is available
-   - What's unclear: Whether to generate on each build or commit once
-   - Recommendation: Generate once with a script, commit the .ico to version control. Avoid build-time dependencies on Pillow for icon generation.
+3. **Should the .ico be generated at build time or committed as a binary asset?** — RESOLVED
+   - Resolution: Generate once with Pillow script, commit `assets/icon.ico` to version control (Plan 06-03).
 
 ## Environment Availability
 

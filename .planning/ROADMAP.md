@@ -134,12 +134,13 @@
 
 **Requirements**: DAT-03, PKG-01, PKG-02, PKG-03
 
-**Plans:**
-1. **P6.1 — Asset path helper** — Implement get_asset_path() that resolves correctly in both dev (relative) and packaged (sys._MEIPASS) modes, replace all hardcoded asset paths across the codebase.
-2. **P6.2 — Schema versioning** — Add _schema_version field to all JSON data files, implement migration registry (version -> transform function), auto-migrate on load when version mismatch detected.
-3. **P6.3 — System tray icon** — Design/source 16x16 and 32x32 .ico files for the pet character, wire into QSystemTrayIcon, ensure icon displays correctly in Windows notification area.
-4. **P6.4 — PyInstaller packaging** — Configure PyInstaller spec file (--onedir mode), bundle all assets/sprites/sounds/icons, exclude unused PySide6 modules to reduce size, test clean install on a machine without Python.
+**Plans:** 4 plans
+
+- [x] 06-01-PLAN.md — Asset path helper (TDD): create get_asset_path() in utils/assets.py, replace hardcoded paths in main.py and chat_engine.py
+- [x] 06-02-PLAN.md — Schema versioning (TDD): add migration registry to JsonStore, update ScheduleStore and CalendarStore with _schema_version
+- [x] 06-03-PLAN.md — System tray icon: generate multi-res .ico with Pillow, update tray.py to load from disk
+- [x] 06-04-PLAN.md — PyInstaller packaging: install PyInstaller, create spec file, add frozen check to main.py, verify build
 
 ---
 
-*Last updated: 2026-05-10 — Phase 5 planned with 4 plans (REM-01, REM-02, REM-03)*
+*Last updated: 2026-05-10 — Phase 6 complete, all 6 phases delivered*
