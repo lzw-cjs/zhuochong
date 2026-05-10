@@ -1,7 +1,11 @@
 """系统托盘图标与菜单"""
+from pathlib import Path
+
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QAction
 from PySide6.QtCore import Qt, Signal
+
+from utils.assets import get_asset_path
 
 
 def create_placeholder_icon() -> QIcon:
@@ -41,8 +45,12 @@ class PetTrayIcon(QSystemTrayIcon):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # 设置图标
-        self.setIcon(create_placeholder_icon())
+        # 设置图标 — 优先加载 .ico，回退到占位图
+        ico_path = get_asset_path("assets/icon.ico")
+        if ico_path.exists():
+            self.setIcon(QIcon(str(ico_path)))
+        else:
+            self.setIcon(create_placeholder_icon())
         self.setToolTip("智能桌面宠物")
 
         # 右键菜单
