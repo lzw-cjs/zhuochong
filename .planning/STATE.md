@@ -7,8 +7,8 @@ last_updated: "2026-05-10T03:00:00Z"
 progress:
   total_phases: 6
   completed_phases: 6
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 25
+  completed_plans: 25
   percent: 100
 ---
 
@@ -21,7 +21,7 @@ Phase 6 (Polish & Packaging) 执行完成，所有 4 个计划已交付。项目
 ## Progress
 
 | Phase | Name | Status | Plans Done |
-|-------|------|--------|------------|
+| --- | --- | --- | --- |
 | 1 | Skeleton & Animation | **Complete** | 4/4 |
 | 2 | Interaction | **Complete** | 4/4 |
 | 3 | Chat System | **Complete** | 4/4 |
@@ -32,7 +32,7 @@ Phase 6 (Polish & Packaging) 执行完成，所有 4 个计划已交付。项目
 ## Phase 4 Summary
 
 | Plan | Name | Wave | Status |
-|------|------|------|--------|
+| --- | --- | --- | --- |
 | P4.1 | 事件数据模型 + 存储 | 0 | ✓ Complete |
 | P4.2 | 多日历支持 | 0 | ✓ Complete |
 | P4.3 | 日程面板 UI | 1 | ✓ Complete |
@@ -55,7 +55,7 @@ Phase 6 (Polish & Packaging) 执行完成，所有 4 个计划已交付。项目
 ## Phase 5 Summary
 
 | Plan | Name | Wave | Status |
-|------|------|------|--------|
+| --- | --- | --- | --- |
 | P5.1 | 提醒引擎核心 (TDD) | 0 | ✓ Complete |
 | P5.2 | ALERT 动画状态 | 1 | ✓ Complete |
 | P5.3 | 音效 + UI 集成 | 2 | ✓ Complete |
@@ -75,7 +75,7 @@ Phase 6 (Polish & Packaging) 执行完成，所有 4 个计划已交付。项目
 ## Phase 6 Summary
 
 | Plan | Name | Wave | Status |
-|------|------|------|--------|
+| --- | --- | --- | --- |
 | P6.1 | 资源路径助手 (TDD) | 0 | ✓ Complete |
 | P6.2 | JSON Schema 版本管理 (TDD) | 0 | ✓ Complete |
 | P6.3 | 系统托盘 .ico 图标 | 1 | ✓ Complete |
