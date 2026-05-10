@@ -46,7 +46,7 @@ class EventDialog(QDialog):
         if event and event.datetime_str:
             try:
                 dt = datetime.fromisoformat(event.datetime_str)
-                self._dt.setDateTime(QDateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute))
+                self._dt.setDateTime(QDateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second))
             except ValueError:
                 self._dt.setDateTime(QDateTime.currentDateTime())
         else:
