@@ -126,3 +126,10 @@ class CalendarGrid(QWidget):
             self._month = 1
             self._year += 1
         self._refresh()
+
+    def go_to_today(self):
+        """跳转到今天的月份。"""
+        self._today = date.today()
+        self._year = self._today.year
+        self._month = self._today.month
+        self._refresh()

@@ -153,12 +153,16 @@ class TestPetCore:
         from pet.animator import generate_all_placeholder_frames
 
         frames = generate_all_placeholder_frames()
-        assert len(frames) == 5  # 5 个状态
+        assert len(frames) == 9  # 9 个状态
         assert PetState.IDLE in frames
         assert PetState.WALK in frames
         assert PetState.SLEEP in frames
         assert PetState.HAPPY in frames
         assert PetState.ALERT in frames
+        assert PetState.EAT in frames
+        assert PetState.PLAY in frames
+        assert PetState.GROOM in frames
+        assert PetState.REST in frames
 
         # 验证每个状态的帧数
         expected_counts = {
@@ -167,6 +171,10 @@ class TestPetCore:
             PetState.SLEEP: 4,
             PetState.HAPPY: 4,
             PetState.ALERT: 4,
+            PetState.EAT: 6,
+            PetState.PLAY: 6,
+            PetState.GROOM: 4,
+            PetState.REST: 4,
         }
         for state, expected in expected_counts.items():
             assert len(frames[state]) == expected, f"{state} should have {expected} frames"

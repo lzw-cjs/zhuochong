@@ -23,3 +23,12 @@ Thumbs.db
 
 # Firecrawl
 .firecrawl/
+
+# Generated output
+output/
+
+# Environment variables
+.env
+
+# Claude Code local overrides
+.claude/settings.local.json

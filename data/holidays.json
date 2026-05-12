@@ -1,0 +1,64 @@
+{
+  "holidays": [
+    {
+      "id": "spring_festival",
+      "name": "春节",
+      "type": "lunar",
+      "month": 1,
+      "day": 1,
+      "duration_days": 3,
+      "costume": "red_lantern_hat",
+      "emoji": "🧧"
+    },
+    {
+      "id": "mid_autumn",
+      "name": "中秋节",
+      "type": "lunar",
+      "month": 8,
+      "day": 15,
+      "duration_days": 1,
+      "costume": "moon_cake",
+      "emoji": "🥮"
+    },
+    {
+      "id": "dragon_boat",
+      "name": "端午节",
+      "type": "lunar",
+      "month": 5,
+      "day": 5,
+      "duration_days": 1,
+      "costume": "dragon_hat",
+      "emoji": "🐉"
+    },
+    {
+      "id": "national_day",
+      "name": "国庆节",
+      "type": "solar",
+      "month": 10,
+      "day": 1,
+      "duration_days": 3,
+      "costume": "flag_ribbon",
+      "emoji": "🇨🇳"
+    },
+    {
+      "id": "new_year",
+      "name": "元旦",
+      "type": "solar",
+      "month": 1,
+      "day": 1,
+      "duration_days": 1,
+      "costume": "party_hat",
+      "emoji": "🎉"
+    },
+    {
+      "id": "children_day",
+      "name": "儿童节",
+      "type": "solar",
+      "month": 6,
+      "day": 1,
+      "duration_days": 1,
+      "costume": "balloon",
+      "emoji": "🎈"
+    }
+  ]
+}

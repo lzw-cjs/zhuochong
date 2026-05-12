@@ -95,3 +95,34 @@ class ReminderEngine(QObject):
         self._store.update(ev)
         self._notified.discard(ev.id)
         return True
+
+    def daily_check(self):
+        """每日全量扫描：标记所有过期事件。"""
+        now = datetime.now()
+        for ev in self._store.get_all():
+            if ev.status != "pending":
+                continue
+            if ev.id in self._notified:
+                continue
+            # 有截止时间：以截止时间为准
+            if ev.deadline_str:
+                try:
+                    deadline = datetime.fromisoformat(ev.deadline_str)
+                    if now > deadline:
+                        ev.status = "overdue"
+                        self._store.update(ev)
+                        self._notified.add(ev.id)
+                        self.overdue.emit(ev)
+                except ValueError:
+                    pass
+            # 无截止时间：以事件时间为准
+            elif ev.datetime_str:
+                try:
+                    event_time = datetime.fromisoformat(ev.datetime_str)
+                    if now > event_time:
+                        ev.status = "overdue"
+                        self._store.update(ev)
+                        self._notified.add(ev.id)
+                        self.overdue.emit(ev)
+                except ValueError:
+                    pass

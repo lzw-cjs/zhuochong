@@ -2,7 +2,7 @@
 import uuid
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QListWidget, QListWidgetItem,
@@ -212,8 +212,31 @@ class SchedulePanel(QWidget):
         self._cal_store = CalendarStore()
         self._selected_date: str = ""
 
-        layout = QHBoxLayout(self)
+        layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(6)
+
+        # 标题栏
+        title_bar = QHBoxLayout()
+        title_label = QLabel("日程管理")
+        title_label.setStyleSheet("font-weight: bold; font-size: 14px; color: #8B5A2B;")
+        min_btn = QPushButton("—")
+        min_btn.setFixedSize(28, 28)
+        min_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #8B5A2B;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: bold;
+            }
+            QPushButton:hover { background-color: #A0784C; }
+        """)
+        min_btn.clicked.connect(self.hide)
+        title_bar.addWidget(title_label, 1)
+        title_bar.addWidget(min_btn)
+        layout.addLayout(title_bar)
 
         splitter = QSplitter(Qt.Orientation.Horizontal)
 
@@ -295,6 +318,20 @@ class SchedulePanel(QWidget):
         splitter.addWidget(right)
         layout.addWidget(splitter)
 
+        self._refresh()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        today_str = date.today().isoformat()
+        if self._selected_date != today_str:
+            self._selected_date = today_str
+            self._cal_grid.go_to_today()
+            self._refresh_events()
+
+    def refresh_today(self):
+        """午夜刷新：跳转到今天。"""
+        self._selected_date = date.today().isoformat()
+        self._cal_grid.go_to_today()
         self._refresh()
 
     def _refresh(self):

@@ -2,7 +2,7 @@
 
 ## Overview
 
-6 phases | 22 requirements mapped | All v1 requirements covered
+7 phases | 28 requirements mapped | v1 complete, v2 in planning
 
 | Phase | Name | Requirements |
 |-------|------|--------------|
@@ -12,6 +12,7 @@
 | 4 | Calendar Data Layer | SCH-01, SCH-02, SCH-03, SCH-04 |
 | 5 | Reminder Engine | REM-01, REM-02, REM-03 |
 | 6 | Polish & Packaging | DAT-03, PKG-01, PKG-02, PKG-03 |
+| 7 | Otter Enhancement | OTTER-01~06 |
 
 ---
 
@@ -143,4 +144,26 @@
 
 ---
 
-*Last updated: 2026-05-10 — Phase 6 complete, all 6 phases delivered*
+### Phase 7: Otter Enhancement
+
+**Goal:** 水獭外观清晰可辨，WALK 满屏走动，状态头标可见，切换有过渡动画，节日自动换装。
+**Mode:** mvp
+
+**Success Criteria:**
+1. 用户一眼看出是水獭，9 个状态视觉差异明显。
+2. WALK 状态水獭满屏幕随机走动，用户拖拽后自动让出控制。
+3. 每个非 IDLE 状态头顶显示对应 emoji 指示器。
+4. 状态切换有 300ms alpha 渐变过渡，ALERT 可中断。
+5. 节日期间水獭自动换装（春节/中秋/端午/国庆/元旦/儿童节）。
+
+**Requirements:** OTTER-01, OTTER-02, OTTER-03, OTTER-04, OTTER-05, OTTER-06
+
+**Plans:**
+1. **P7.1 — 扩展状态 + 水獭外观** — 新增 EAT/PLAY/GROOM/REST 状态，重写占位图绘制为水獭造型，添加 state_changed 信号。
+2. **P7.2 — 屏幕移动 + 行为调度** — MovementController 实现 WALK 自主移动，扩展 BehaviorScheduler 支持 9 状态随机调度。
+3. **P7.3 — 状态头标 + 过渡动画** — StateIndicator 悬浮 emoji，TransitionAnimator 300ms alpha 渐变。
+4. **P7.4 — 节日换装系统** — HolidayEngine 每日检测节日（含农历），CostumeRenderer QPainter 叠加绘制服装。
+
+---
+
+*Last updated: 2026-05-11 — Phase 7 planned, otter enhancement*
