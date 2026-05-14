@@ -82,7 +82,7 @@ class TestMicrophoneRecorder:
         assert rec.is_recording is False
 
     @patch("pet.voice_stt.HAS_SOUNDDEVICE", True)
-    @patch("pet.voice_stt.sd")
+    @patch("pet.voice_stt.sd", create=True)
     def test_start_stop_recording(self, mock_sd):
         from pet.voice_stt import MicrophoneRecorder
         mock_stream = MagicMock()
@@ -246,7 +246,7 @@ class TestTTSWorker:
         assert "edge-tts 未安装" in errors[0]
 
     @patch("pet.voice_tts.HAS_EDGE_TTS", True)
-    @patch("pet.voice_tts.edge_tts")
+    @patch("pet.voice_tts.edge_tts", create=True)
     def test_success_emits_mp3(self, mock_edge_tts):
         from pet.voice_tts import TTSWorker
         import io
