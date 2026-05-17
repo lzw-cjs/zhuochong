@@ -1,7 +1,8 @@
 """Smart Desktop Pet — 应用入口"""
 import os
+import re
 import sys
-from datetime import date
+from datetime import date, datetime
 
 # Win11 RHI 渲染修复：强制使用 OpenGL 后端
 os.environ["QSG_RHI_BACKEND"] = "opengl"
@@ -37,7 +38,39 @@ from pet.holiday_engine import HolidayEngine
 from pet.costume import CostumeRenderer
 from pet.voice_stt import MicrophoneRecorder, XfyunASR, STTWorker
 from pet.voice_tts import EdgeTTSPlayer, TTSWorker
+from pet.llm_tools import (
+    ToolRegistry, TOOL_SCHEMAS,
+    create_event_impl, query_events_impl, delete_event_impl,
+    create_reminder_impl, get_pet_state_impl, get_current_time_impl,
+    analyze_habits_impl,
+)
+from pet.temp_reminder import TempReminderManager
+from pet.proactive_chat import ProactiveChatManager
+from pet.habit_analyzer import HabitAnalyzer
 from utils.assets import get_asset_path
+
+
+# 情绪标记解析
+EMOTION_STATE_MAP = {
+    "happy": PetState.HAPPY,
+    "eat": PetState.EAT,
+    "play": PetState.PLAY,
+    "groom": PetState.GROOM,
+    "rest": PetState.REST,
+    "alert": PetState.ALERT,
+    "idle": PetState.IDLE,
+}
+
+
+def parse_emotion(reply: str) -> tuple[str, "PetState | None"]:
+    """解析回复中的情绪标记，返回 (清理后文本, 状态)。"""
+    match = re.search(r'\[emotion:(\w+)\]', reply)
+    if match:
+        emotion = match.group(1).lower()
+        clean_text = reply[:match.start()].strip()
+        state = EMOTION_STATE_MAP.get(emotion)
+        return clean_text, state
+    return reply, None
 
 
 def main():
@@ -175,6 +208,24 @@ def main():
         return None
 
     llm_engine = create_llm_engine(settings)
+
+    # 为 LLM 引擎设置上下文提供者（动态系统提示词）
+    def get_chat_context():
+        now = datetime.now().isoformat()
+        today_events = [
+            f"{e.title}({e.datetime_str})"
+            for e in schedule_store.get_all()
+            if e.datetime_str.startswith(date.today().isoformat())
+        ]
+        return {
+            "current_time": now,
+            "today_events": today_events,
+            "pet_state": animator.current_state.value,
+        }
+
+    if llm_engine:
+        llm_engine.set_context_provider(get_chat_context)
+
     _worker = [None]  # 持有当前 worker 引用防止 GC
 
     # 创建聊天面板
@@ -282,6 +333,7 @@ def main():
     def on_pet_clicked():
         movement.stop()  # 点击时停止移动
         behavior.on_user_interaction()
+        proactive_chat.on_user_interaction()  # 记录交互时间
         reply = chat_engine.get_reply("你好")
         pos = window.get_position()
         bubble.show_message(reply, pos[0] + 128, pos[1])
@@ -320,21 +372,42 @@ def main():
     # 聊天面板消息处理（LLM 优先，规则兜底）
     def on_chat_message(text):
         chat_history.append("user", text)
+        proactive_chat.on_user_interaction()  # 记录交互时间
 
         if llm_engine:
             chat_panel.show_loading()
             messages = chat_history.get_context(limit=settings.llm_max_history)
 
-            worker = LLMWorker(llm_engine, messages)
+            worker = LLMWorker(llm_engine, messages, tool_registry=tool_registry)
             _worker[0] = worker
 
             def on_reply(reply):
                 chat_panel.hide_loading()
-                chat_panel.add_message(reply, is_user=False)
-                chat_history.append("assistant", reply)
+                # 解析情绪标记
+                clean_text, emotion_state = parse_emotion(reply)
+                chat_panel.add_message(clean_text, is_user=False)
+                chat_history.append("assistant", clean_text)
                 pos = window.get_position()
-                bubble.show_message(reply, pos[0] + 128, pos[1])
-                speak_reply(reply)
+                bubble.show_message(clean_text, pos[0] + 128, pos[1])
+                speak_reply(clean_text)
+                # 应用情绪状态
+                if emotion_state:
+                    animator.set_state(emotion_state)
+                    QTimer.singleShot(10000, lambda: animator.set_state(PetState.IDLE))
+
+            def on_tool(name, result):
+                """工具执行反馈。"""
+                tool_names = {
+                    "create_event": "正在创建日程...",
+                    "query_events": "正在查询日程...",
+                    "delete_event": "正在删除日程...",
+                    "create_reminder": "正在设置提醒...",
+                    "get_pet_state": "正在查看状态...",
+                    "get_current_time": "正在获取时间...",
+                    "analyze_habits": "正在分析习惯...",
+                }
+                msg = tool_names.get(name, f"正在执行 {name}...")
+                chat_panel.add_message(msg, is_user=False)
 
             def on_error(error_msg):
                 chat_panel.hide_loading()
@@ -349,6 +422,7 @@ def main():
                 speak_reply(reply)
 
             worker.reply_ready.connect(on_reply)
+            worker.tool_executed.connect(on_tool)
             worker.error_occurred.connect(on_error)
             worker.start()
         else:
@@ -366,6 +440,70 @@ def main():
     # 创建提醒引擎
     schedule_store = ScheduleStore()
     reminder = ReminderEngine(schedule_store)
+
+    # 创建临时提醒管理器
+    temp_reminder = TempReminderManager()
+
+    # 创建习惯分析器
+    habit_analyzer = HabitAnalyzer(schedule_store)
+
+    # 创建工具注册中心
+    tool_registry = ToolRegistry()
+    tool_registry.register(
+        "create_event",
+        lambda **kw: create_event_impl(schedule_store, **kw),
+        TOOL_SCHEMAS[0],
+    )
+    tool_registry.register(
+        "query_events",
+        lambda **kw: query_events_impl(schedule_store, **kw),
+        TOOL_SCHEMAS[1],
+    )
+    tool_registry.register(
+        "delete_event",
+        lambda event_id: delete_event_impl(schedule_store, event_id),
+        TOOL_SCHEMAS[2],
+    )
+    tool_registry.register(
+        "create_reminder",
+        lambda text, delay_minutes: create_reminder_impl(temp_reminder, text, delay_minutes),
+        TOOL_SCHEMAS[3],
+    )
+    tool_registry.register(
+        "get_pet_state",
+        lambda: get_pet_state_impl(lambda: animator.current_state.value),
+        TOOL_SCHEMAS[4],
+    )
+    tool_registry.register(
+        "get_current_time",
+        lambda: get_current_time_impl(),
+        TOOL_SCHEMAS[5],
+    )
+    tool_registry.register(
+        "analyze_habits",
+        lambda: analyze_habits_impl(habit_analyzer),
+        TOOL_SCHEMAS[6],
+    )
+
+    # 临时提醒触发：气泡 + ALERT 状态 + 音效
+    def on_temp_reminder_fired(text):
+        pos = window.get_position()
+        bubble.show_message(f"提醒: {text}", pos[0] + 128, pos[1], duration_ms=5000)
+        animator.set_state(PetState.ALERT)
+        sound_manager.play_reminder(muted=settings.muted)
+        QTimer.singleShot(5000, lambda: animator.set_state(PetState.IDLE))
+
+    temp_reminder.reminder_fired.connect(on_temp_reminder_fired)
+
+    # 创建主动对话管理器
+    proactive_chat = ProactiveChatManager(schedule_store)
+
+    def on_proactive_chat(text):
+        pos = window.get_position()
+        bubble.show_message(text, pos[0] + 128, pos[1], duration_ms=5000)
+        chat_panel.add_message(text, is_user=False)
+
+    proactive_chat.trigger_chat.connect(on_proactive_chat)
 
     # 创建前提醒引擎
     pre_reminder = PreReminderEngine(schedule_store)
@@ -501,6 +639,9 @@ def main():
             settings_new = Settings.load()
             settings.__dict__.update(settings_new.__dict__)
             llm_engine = create_llm_engine(settings)
+            # 为新引擎设置上下文提供者
+            if llm_engine:
+                llm_engine.set_context_provider(get_chat_context)
             chat_history.set_max_messages(settings.llm_max_history)
             # 更新语音组件
             xfyun_asr = create_xfyun_asr(settings)
@@ -574,6 +715,7 @@ def main():
     def on_about_to_quit():
         movement.stop()  # 停止自主移动
         pre_reminder.stop()  # 停止前提醒轮询
+        temp_reminder.cancel_all()  # 取消所有临时提醒
         pos = window.get_position()
         settings.pet_x = pos[0]
         settings.pet_y = pos[1]

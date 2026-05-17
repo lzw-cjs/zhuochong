@@ -1,4 +1,5 @@
 """聊天面板：独立窗口，消息列表 + 输入框"""
+import json
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QScrollArea,
@@ -315,20 +316,103 @@ class LoadingIndicator(QWidget):
 
 
 class LLMWorker(QThread):
-    """LLM API 异步调用工作线程。"""
+    """LLM API 异步调用工作线程，支持工具调用循环。"""
 
     reply_ready = Signal(str)
     error_occurred = Signal(str)
+    tool_executed = Signal(str, str)  # (tool_name, tool_result)
 
-    def __init__(self, llm_engine, messages: list[dict], parent=None):
+    # 最大工具调用轮数，防止无限循环
+    MAX_TOOL_ROUNDS = 5
+
+    def __init__(self, llm_engine, messages: list[dict], tool_registry=None, parent=None):
         super().__init__(parent)
         self._engine = llm_engine
         self._messages = messages
+        self._tool_registry = tool_registry
 
     def run(self):
         import asyncio
         try:
-            reply = asyncio.run(self._engine.get_reply_async(self._messages))
-            self.reply_ready.emit(reply)
+            result = asyncio.run(self._run_with_tools())
+            if isinstance(result, str):
+                self.reply_ready.emit(result)
+            elif isinstance(result, dict) and result.get("type") == "tool_call":
+                # 超出最大轮数时，返回最后一条消息
+                self.reply_ready.emit("(工具调用次数过多，请稍后再试)")
+            else:
+                self.reply_ready.emit(str(result))
         except Exception as e:
             self.error_occurred.emit(str(e))
+
+    async def _run_with_tools(self) -> str:
+        """执行 LLM 对话，支持多轮工具调用。"""
+        messages = list(self._messages)
+        tools = None
+
+        if self._tool_registry:
+            tools = self._tool_registry.get_tools()
+
+        for round_num in range(self.MAX_TOOL_ROUNDS):
+            reply = await self._engine.get_reply_async(messages, tools=tools)
+
+            # 纯文本回复，直接返回
+            if isinstance(reply, str):
+                return reply
+
+            # 工具调用
+            if isinstance(reply, dict) and reply.get("type") == "tool_call":
+                tool_name = reply["name"]
+                tool_args = reply["arguments"]
+                tool_call_id = reply.get("tool_call_id", "")
+
+                # 执行工具
+                if self._tool_registry:
+                    tool_result = self._tool_registry.execute(tool_name, tool_args)
+                else:
+                    tool_result = json.dumps({"error": "工具未注册"}, ensure_ascii=False)
+
+                # 发射工具执行信号（用于 UI 反馈）
+                self.tool_executed.emit(tool_name, tool_result)
+
+                # 构造工具调用消息和结果消息（兼容两种协议）
+                if "message" in reply:
+                    # OpenAI 格式
+                    messages.append(reply["message"])
+                    messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call_id,
+                        "content": tool_result,
+                    })
+                elif "content_blocks" in reply:
+                    # Anthropic 格式：回传 assistant content + tool_result
+                    messages.append({
+                        "role": "assistant",
+                        "content": reply["content_blocks"],
+                    })
+                    messages.append({
+                        "role": "user",
+                        "content": [{
+                            "type": "tool_result",
+                            "tool_use_id": tool_call_id,
+                            "content": tool_result,
+                        }],
+                    })
+                else:
+                    # 简化格式（兜底）
+                    messages.append({
+                        "role": "assistant",
+                        "content": f"[调用工具 {tool_name}]",
+                    })
+                    messages.append({
+                        "role": "user",
+                        "content": f"工具 {tool_name} 返回结果：{tool_result}",
+                    })
+                # 继续循环，让 LLM 基于结果生成最终回复
+                continue
+
+            # 未知格式，返回字符串表示
+            return str(reply)
+
+        # 超出最大轮数
+        return "(工具调用次数过多，请稍后再试)"
