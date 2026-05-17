@@ -146,6 +146,12 @@ Phase 6 (Polish & Packaging) 执行完成，所有 4 个计划已交付。项目
 
 (None)
 
+## Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260517-uad | 实现桌面宠物小獭的所有可做的AI增强功能 | 2026-05-17 | b7bed4b | [260517-uad-ai](./quick/260517-uad-ai/) |
+
 ---
 
-Last updated: 2026-05-12 — 全屏透明窗口改造完成，水獭直接浮在桌面
+Last updated: 2026-05-17 — AI 增强功能完成：工具调用、智能日程、情绪感知、主动对话、习惯分析
