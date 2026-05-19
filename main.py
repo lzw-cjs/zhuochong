@@ -108,11 +108,17 @@ def main():
             return
         pixmap = animator.current_pixmap()
         if pixmap:
-            # 应用节日服装
+            # 应用节日服装（可能扩展画布并返回偏移量）
+            costume_ox, costume_oy = 0, 0
             if costume_renderer.has_active_costume():
-                pixmap = costume_renderer.apply_costume(pixmap)
+                pixmap, costume_ox, costume_oy = costume_renderer.apply_costume(pixmap)
             _last_displayed[0] = pixmap
-            window.set_pixmap(pixmap)
+            window.set_pixmap(pixmap, costume_ox, costume_oy)
+            # 更新指示器位置（跟随弹跳 + 服装偏移）
+            if indicator.isVisible():
+                pos = window.get_position()
+                bounce = animator.get_bounce_offset()
+                indicator.update_position(pos[0], pos[1], bounce, costume_oy)
 
     display_timer = QTimer()
     display_timer.timeout.connect(update_display)
@@ -154,9 +160,13 @@ def main():
             # 无有效旧帧时直接显示新帧，避免黑框
             window.set_pixmap(to_pix)
             _last_displayed[0] = to_pix
-        # 更新指示器
+        # 更新指示器（跟随弹跳 + 服装偏移）
         pos = window.get_position()
-        indicator.show_for_state(state, pos[0], pos[1])
+        bounce = animator.get_bounce_offset()
+        costume_oy = 0
+        if costume_renderer.has_active_costume():
+            _, _, costume_oy = costume_renderer.apply_costume(to_pix or QPixmap())
+        indicator.show_for_state(state, pos[0], pos[1], bounce, costume_oy)
 
     animator.state_changed.connect(on_state_changed)
 
@@ -691,7 +701,7 @@ def main():
         if movement.is_moving:
             movement.stop()
             animator.set_state(PetState.IDLE)
-        # 更新指示器位置
+        # 更新指示器位置（拖拽时无弹跳和服装偏移）
         indicator.update_position(x, y)
         if not _save_throttle.isActive():
             _save_throttle.start()

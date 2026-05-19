@@ -540,6 +540,19 @@ class SpriteAnimator(QObject):
             return None
         return frames[self._current_frame]
 
+    def get_bounce_offset(self) -> int:
+        """获取当前帧的弹跳偏移量（向上为正值）。"""
+        bounce_map = {
+            PetState.IDLE: [0, 3, 6, 3],
+            PetState.HAPPY: [0, 12, 20, 12],
+            PetState.SLEEP: [0, 0, 0, 0],
+            PetState.REST: [0, 0, 0, 0],
+        }
+        offsets = bounce_map.get(self._current_state)
+        if not offsets:
+            return 0
+        return offsets[self._current_frame % len(offsets)]
+
     @property
     def current_state(self) -> PetState:
         return self._current_state

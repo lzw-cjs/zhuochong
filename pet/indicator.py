@@ -78,7 +78,8 @@ class StateIndicator(QWidget):
         """设置精灵实际显示宽度，用于居中计算。"""
         self._sprite_display_width = width
 
-    def show_for_state(self, state: PetState, anchor_x: int, anchor_y: int):
+    def show_for_state(self, state: PetState, anchor_x: int, anchor_y: int,
+                       bounce_offset: int = 0, costume_offset_y: int = 0):
         """根据状态显示对应 emoji，IDLE 时隐藏。"""
         self._current_state = state
         emoji = self.STATE_EMOJI.get(state, "")
@@ -87,19 +88,25 @@ class StateIndicator(QWidget):
             return
         font_size = int(28 * self._scale)
         self._label.setText(f'<span style="font-size:{font_size}px">{emoji}</span>')
-        self._update_anchor_position(anchor_x, anchor_y)
+        self._update_anchor_position(anchor_x, anchor_y, bounce_offset, costume_offset_y)
         self.show()
         self.update()
 
-    def update_position(self, anchor_x: int, anchor_y: int):
+    def update_position(self, anchor_x: int, anchor_y: int,
+                        bounce_offset: int = 0, costume_offset_y: int = 0):
         """跟随宠物位置更新。"""
         if self.isVisible():
-            self._update_anchor_position(anchor_x, anchor_y)
+            self._update_anchor_position(anchor_x, anchor_y, bounce_offset, costume_offset_y)
 
-    def _update_anchor_position(self, anchor_x: int, anchor_y: int):
+    def _update_anchor_position(self, anchor_x: int, anchor_y: int,
+                                bounce_offset: int = 0, costume_offset_y: int = 0):
         """定位在 anchor 上方居中 + 浮动偏移。"""
         x = anchor_x + (self._sprite_display_width - self._indicator_size) // 2
-        y = anchor_y - self._indicator_size - self._line_length + self._float_offset
+        # 弹跳偏移（画布坐标）和服装偏移（画布坐标）需要缩放到显示坐标
+        display_bounce = int(bounce_offset * self._scale * 1.4)
+        display_costume = int(costume_offset_y * self._scale * 1.4)
+        y = (anchor_y - self._indicator_size - self._line_length
+             + self._float_offset - display_bounce - display_costume)
         self.move(QPoint(int(x), int(y)))
 
     def paintEvent(self, event):

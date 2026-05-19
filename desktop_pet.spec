@@ -18,6 +18,8 @@ pyside6_binaries = collect_dynamic_libs('PySide6')
 project_datas = [
     ('assets', 'assets'),
     ('data/chat_rules.json', 'data'),
+    ('data/costumes.json', 'data'),
+    ('data/holidays.json', 'data'),
 ]
 
 a = Analysis(

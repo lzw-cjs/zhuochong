@@ -100,8 +100,10 @@ class TestCostumeRenderer:
         base = QPixmap(180, 180)
         base.fill(Qt.GlobalColor.red)
 
-        result = renderer.apply_costume(base)
+        result, ox, oy = renderer.apply_costume(base)
         assert not result.isNull()
+        assert ox == 0
+        assert oy == 0
 
     def test_apply_costume_with_active(self, costumes_path):
         from pet.costume import CostumeRenderer
@@ -112,7 +114,7 @@ class TestCostumeRenderer:
         base = QPixmap(180, 180)
         base.fill(Qt.GlobalColor.red)
 
-        result = renderer.apply_costume(base)
+        result, ox, oy = renderer.apply_costume(base)
         assert not result.isNull()
         assert result.width() == 180
         assert result.height() == 180
@@ -126,8 +128,35 @@ class TestCostumeRenderer:
         base = QPixmap(180, 180)
         base.fill(Qt.GlobalColor.red)
 
-        result = renderer.apply_costume(base)
+        result, ox, oy = renderer.apply_costume(base)
         assert not result.isNull()
+
+    def test_apply_costume_negative_coords(self, tmp_path):
+        """测试负坐标服装元素（如帽子 y=-30）不会被裁剪"""
+        from pet.costume import CostumeRenderer
+
+        data = {
+            "hat": {
+                "commands": [
+                    {"shape": "polygon", "points": [[90, -30], [68, 14], [112, 14]], "color": [100, 150, 255]},
+                    {"shape": "ellipse", "x": 72, "y": -8, "w": 36, "h": 40, "color": [220, 20, 20]},
+                ]
+            }
+        }
+        path = tmp_path / "costumes.json"
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+        renderer = CostumeRenderer(path)
+        renderer.set_active_costume("hat")
+
+        base = QPixmap(180, 180)
+        base.fill(Qt.GlobalColor.red)
+
+        result, ox, oy = renderer.apply_costume(base)
+        assert not result.isNull()
+        # 画布应该扩展以容纳负坐标元素
+        assert oy > 0, "服装偏移量应大于 0 以容纳负坐标元素"
+        assert result.height() > 180, "画布高度应大于 180 以容纳超出的服装元素"
 
     def test_execute_command_ellipse(self, qtbot):
         from pet.costume import CostumeRenderer

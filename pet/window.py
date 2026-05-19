@@ -73,6 +73,10 @@ class PetWindow(QWidget):
         # 当前要渲染的 QPixmap
         self._current_pixmap: QPixmap | None = None
 
+        # 服装偏移（精灵在扩展画布中的偏移，用于居中显示）
+        self._costume_offset_x: int = 0
+        self._costume_offset_y: int = 0
+
         # 拖拽相关
         self._dragging = False
         self._drag_start_pos: QPoint | None = None
@@ -89,9 +93,11 @@ class PetWindow(QWidget):
             self.setGeometry(screen.geometry())
         self.setFocus()
 
-    def set_pixmap(self, pixmap: QPixmap) -> None:
+    def set_pixmap(self, pixmap: QPixmap, costume_offset_x: int = 0, costume_offset_y: int = 0) -> None:
         """设置当前要渲染的精灵帧。"""
         self._current_pixmap = pixmap
+        self._costume_offset_x = costume_offset_x
+        self._costume_offset_y = costume_offset_y
         self.update()  # 触发 paintEvent 重绘
 
     def _get_sprite_rect(self) -> QRect:
@@ -125,9 +131,17 @@ class PetWindow(QWidget):
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.FastTransformation,
             )
-            # 居中绘制在精灵位置
-            x = self._sprite_x + (sprite_w - scaled.width()) // 2
-            y = self._sprite_y + (sprite_h - scaled.height()) // 2
+            # 服装偏移也需要缩放
+            pixmap_w = self._current_pixmap.width()
+            pixmap_h = self._current_pixmap.height()
+            display_scale_x = sprite_w / pixmap_w if pixmap_w else 1.0
+            display_scale_y = sprite_h / pixmap_h if pixmap_h else 1.0
+            offset_x = int(self._costume_offset_x * display_scale_x)
+            offset_y = int(self._costume_offset_y * display_scale_y)
+            # 居中绘制，但根据服装偏移调整位置
+            # 偏移表示精灵在扩展画布中的位置，需要向上/左偏移使精灵居中
+            x = self._sprite_x + (sprite_w - scaled.width()) // 2 - offset_x
+            y = self._sprite_y + (sprite_h - scaled.height()) // 2 - offset_y
             painter.drawPixmap(x, y, scaled)
 
         painter.end()
