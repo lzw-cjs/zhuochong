@@ -32,3 +32,10 @@ output/
 
 # Claude Code local overrides
 .claude/settings.local.json
+
+# Build environment
+build_env/
+
+# Coverage
+.coverage
+coverage.json
